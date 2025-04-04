@@ -1,40 +1,52 @@
 import sys
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QLabel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSpinBox, QApplication
 
-class AppContador(QWidget):
+
+class TorresDeHanoi(QWidget):
     def __init__(self):
         super().__init__()
-        self.contador = 0
+        self.setWindowTitle("Torres de Hanoi")
+        self.setGeometry(100, 100, 400, 300)
 
-        self.setWindowTitle("Contador")
-        self.setGeometry(100, 100, 300, 200)
+        self.layout_principal = QVBoxLayout()
 
-        layout = QHBoxLayout()
+        # Selector de número de discos
+        self.layout_selector = QHBoxLayout()
+        self.label_selector = QLabel("Número de discos:")
+        self.spin_box = QSpinBox()
+        self.spin_box.setMinimum(1)
+        self.spin_box.setMaximum(10)
+        self.spin_box.setValue(3)
+        self.boton_resolver = QPushButton("Resolver")
+        self.boton_resolver.clicked.connect(self.resolver_hanoi)
 
-        self.label = QLabel("0", self)
-        self.label.setStyleSheet("font-size: 30px;")
+        self.layout_selector.addWidget(self.label_selector)
+        self.layout_selector.addWidget(self.spin_box)
+        self.layout_selector.addWidget(self.boton_resolver)
 
-        self.button = QPushButton("Incrementar", self)
-        self.button.setStyleSheet("""
-            font-size: 20px;
-            border-radius: 20px;
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            border: 2px solid #3E8E41;
-        """)
+        # Área de salida
+        self.label_resultado = QLabel("")
+        self.label_resultado.setStyleSheet("font-size: 16px;")
 
-        self.button.clicked.connect(self.suma_contador)
+        self.layout_principal.addLayout(self.layout_selector)
+        self.layout_principal.addWidget(self.label_resultado)
 
-        layout.addWidget(self.label)
-        layout.addWidget(self.button)
+        self.setLayout(self.layout_principal)
 
-        self.setLayout(layout)
+    def resolver_hanoi(self):
+        num_discos = self.spin_box.value()
+        self.label_resultado.setText("Resolviendo...")
+        pasos = []
+        self.hanoi(num_discos, 'A', 'C', 'B', pasos)
+        resultado = "\n".join(pasos)
+        self.label_resultado.setText(resultado)
 
-    def suma_contador(self):
-        self.contador += 1
-        if self.contador == 100:
-            self.label.setText("🎉")
-            self.contador = 0
+    def hanoi(self, n, origen, destino, auxiliar, pasos):
+        if n == 1:
+            pasos.append(f"Mover disco de {origen} a {destino}")
         else:
-            self.label.setText(str(self.contador))
+            self.hanoi(n - 1, origen, auxiliar, destino, pasos)
+            pasos.append(f"Mover disco de {origen} a {destino}")
+            self.hanoi(n - 1, auxiliar, destino, origen, pasos)
+
+
